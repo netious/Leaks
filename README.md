@@ -1,2 +1,2 @@
 # Leaks
-# Darmowe leaki z róznym serwerów discord/minecraft/fivem i nie tylko!
+# Udostepniam, nie moje. Pozdro udostepniacie moje rzeczy to ja wasze #maxhardbigcloowns
