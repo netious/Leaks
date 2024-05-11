@@ -1,0 +1,201 @@
+#Autor: melonik16 (discord: melonik16)
+#Dla: ServerHelpers
+#Discord ServerHelpers: https://discord.gg/AkGpdzEEhE
+#Ver: 1.0 <-- Nie zmieniaj tego!
+
+options:
+	czas: 2 real minutes #(Przykłady: 10 real seconds / 10 real minutes / 10 real hours
+	gui: of player's current inventory # nie ruszaj!
+	odebrano: send title "&6Misje dzienne" with subtitle "&aOdebrano nagrodę!" to player
+	inventory: send title "&6Misje dzienne" with subtitle "&cNie posiadasz miejsca w ekwipunku!" to player
+	postep: send title "&6Misje dzienne" with subtitle "&cZbyt mały postęp! &8(&f%{misjadzienna.postep::%player%}%&8)" to player
+	alr: send title "&6Misje dzienne" with subtitle "&cOdebrałeś już nagrodę!" to player
+	brak: send title "&6Misje dzienne" with subtitle "&cBrak dostępnej misji!" to player
+	
+
+command /misjadzienna [<text>]:
+	aliases: misje
+	trigger:
+		wait 1 tick
+		open chest with 5 rows named "&0Misje dzienne" to player
+		wait 1 tick
+		set slot 1 and 9 and 7 and 17 and 37 and 27 and 43 and 45 and 35 {@gui} to yellow stained glass pane named " "
+		set slot 0 and 8 and 36 and 44 {@gui} to orange stained glass pane named " "
+		set slot 2 and 3 and 5 and 6 and 18 and 26 and 38 and 39 and 41 and 42 {@gui} to white stained glass pane named " "
+		wait 1 tick
+		if {misjadzienna.odebrana::%player%} is false:
+			if {misjadzienna::%player%} is "zelazo":
+				set slot 22 {@gui} to iron ore named "&7Wykop 10 żelaza" with lore "&8| &7Postęp: &a%{misjadzienna.postep::%player%}%&8/&210" and "&8| &7Nagroda: &bx2 Diament" and " " and "&eKliknij aby odebrać nagrodę."
+			else if {misjadzienna::%player%} is "diament":
+				set slot 22 {@gui} to diamond ore named "&bWykop 10 diamentów" with lore "&8| &7Postęp: &a%{misjadzienna.postep::%player%}%&8/&210" and "&8| &7Nagroda: &ex16 Sztabka złota" and " " and "&eKliknij aby odebrać nagrodę."
+			else if {misjadzienna::%player%} is "kill":
+				set slot 22 {@gui} to skull of player named "&cZabij 5 graczy" with lore "&8| &7Postęp: &a%{misjadzienna.postep::%player%}%&8/&25" and "&8| &7Nagroda: &b1x Diamentowy miecz" and " " and "&eKliknij aby odebrać nagrodę."
+			else if {misjadzienna::%player%} is "blok":
+				set slot 22 {@gui} to cobbled deepslate named "&6Postaw 150 bloków" with lore "&8| &7Postęp: &a%{misjadzienna.postep::%player%}%&8/&2150" and "&8| &7Nagroda: &52x Pradawne zgliszcza" and " " and "&eKliknij aby odebrać nagrodę."
+			else:
+				set slot 22 {@gui} to barrier named "&4Brak misji dziennej!"
+		else:
+			set slot 22 {@gui} to barrier named "&4Wykonałeś już misję dzienną!"
+
+on inventory click:
+	event-inventory is not player's inventory
+	if event.getView().getTitle() is "&0Misje dzienne":
+		cancel event
+		if clicked slot is 22:
+			close player's inventory
+			if {misjadzienna.odebrana::%player%} is false:
+				if {misjadzienna::%player%} is "zelazo":
+					if {misjadzienna.postep::%player%} >= 10:
+						if player can hold 2 of diamond:
+							give 2 of diamond to player
+							set {misjadzienna.odebrana::%player%} to true
+							{@odebrano}
+						else:
+							{@inventory}
+					else:
+						{@postep}
+				else if {misjadzienna::%player%} is "diament":
+					if {misjadzienna.postep::%player%} >= 10:
+						if player can hold 16 of gold ingot:
+							give 16 of gold ingot to player
+							set {misjadzienna.odebrana::%player%} to true
+							{@odebrano}
+						else:
+							{@inventory}
+					else:
+						{@postep}
+				else if {misjadzienna::%player%} is "kill":
+					if {misjadzienna.postep::%player%} >= 5:
+						if player can hold 1 of diamond sword:
+							give 1 of diamond sword to player
+							set {misjadzienna.odebrana::%player%} to true
+							{@odebrano}
+						else:
+							{@inventory}
+					else:
+						{@postep}
+				else if {misjadzienna::%player%} is "blok":
+					if {misjadzienna.postep::%player%} >= 150:
+						if player can hold 2 of ancient debris:
+							give 2 of ancient debris to player
+							set {misjadzienna.odebrana::%player%} to true
+							{@odebrano}
+						else:
+							{@inventory}
+					else:
+						{@postep}
+				else:
+					{@brak}
+			else:
+				{@alr}
+
+every {@czas}:
+	send "&6[Misje dzienne] &eWylosowano nową misję!" to console
+	loop {misjadzienna::*}:
+		clear {misjadzienna::%loop-value%}
+	wait 2 tick
+	loop all players:
+		Misjadzienna(loop-player)
+		wait 10 tick
+		Losuj(loop-player)
+	
+function Misjadzienna(gracz: player):
+	send title "&6Misje dzienne" with subtitle "&eWylosowano nową misję! &8(&f/misje&8)" to {_gracz}
+	send " " to {_gracz}
+	send "&6&lMisje dzienne &8» &7Wylosowano nową misje! &8(&f/misje&8)" to {_gracz}
+	send " " to {_gracz}
+
+function Losuj(gracz: player):
+	wait 2 tick
+	set {_int} to "%random integer between 1 and 4%" parsed as number
+	wait 1 tick
+	set {misjadzienna.postep::%{_gracz}%} to 0
+	set {misjadzienna.odebrana::%{_gracz}%} to false
+	if {_int} is 1:
+		set {misjadzienna::%{_gracz}%} to "zelazo"
+	if {_int} is 2:
+		set {misjadzienna::%{_gracz}%} to "diament"
+	if {_int} is 3:
+		set {misjadzienna::%{_gracz}%} to "kill"
+	if {_int} is 4:
+		set {misjadzienna::%{_gracz}%} to "blok"
+
+on join:
+	add player to {misjadzienna::*}
+	add player to {misjadzienna.postep::*}
+	if {misjadzienna::%player%} is not set:
+		wait 1 second
+		Misjadzienna(player)
+		wait 10 tick
+		Losuj(player)
+
+command /resetmisje [<text>]:
+	permission: melonik16.resetmisje
+	permission message: &cNie posiadasz perminsji!
+	trigger:
+		loop {misjadzienna::*}:
+			clear {misjadzienna::%loop-value%}
+		send action bar "&cLosuje.." to player
+		wait 2 tick
+		loop all players:
+			Misjadzienna(loop-player)
+			wait 10 tick
+			Losuj(loop-player)
+
+command /misje-variableclear <player>:
+	permission: melonik16.variableclear
+	permission message: &cNie posiadasz perminsji!
+	trigger:
+		clear {misjadzienna::%arg 1%}
+		clear {misjadzienna.postep::%arg 1%}
+		send "&cWyczyszczono zmienne gracza &4%arg 1%&c!" to player
+
+on break of iron ore or deepslate iron ore:
+	if {misjadzienna::%player%} is "zelazo":
+		if {misjadzienna.postep::%player%} >= 10:
+			if {misjadzienna.odebrana::%player%} is false:
+				send "&6&lMisje dzienne &8» &7Odbierz nagrodę! &8(&f/misje&8)" to player
+			else:
+				stop
+		else:
+			add 1 to {misjadzienna.postep::%player%}
+			wait 2 tick
+			send "&6&lMisje dzienne &8» &7Postęp: &a%{misjadzienna.postep::%player%}%&8/&210" to player
+
+on break of diamond ore or deepslate diamond ore:
+	if {misjadzienna::%player%} is "diament":
+		if {misjadzienna.postep::%player%} >= 10:
+			if {misjadzienna.odebrana::%player%} is false:
+				send "&6&lMisje dzienne &8» &7Odbierz nagrodę! &8(&f/misje&8)" to player
+			else:
+				stop
+		else:
+			add 1 to {misjadzienna.postep::%player%}
+			wait 2 tick
+			send "&6&lMisje dzienne &8» &7Postęp: &a%{misjadzienna.postep::%player%}%&8/&210" to player
+
+on death of player:
+	attacker is player
+	if {misjadzienna::%attacker%} is "kill":
+		if {misjadzienna.postep::%attacker%} >= 5:
+			if {misjadzienna.odebrana::%attacker%} is false:
+				send "&6&lMisje dzienne &8» &7Odbierz nagrodę! &8(&f/misje&8)" to attacker
+			else:
+				stop
+		else:
+			add 1 to {misjadzienna.postep::%attacker%}
+			wait 2 tick
+			send "&6&lMisje dzienne &8» &7Postęp: &a%{misjadzienna.postep::%attacker%}%&8/&25" to attacker
+
+on place:
+	if {misjadzienna::%player%} is "blok":
+		if {misjadzienna.postep::%player%} >= 150:
+			if {misjadzienna.odebrana::%player%} is false:
+				send "&6&lMisje dzienne &8» &7Odbierz nagrodę! &8(&f/misje&8)" to player
+			else:
+				stop
+		else:
+			add 1 to {misjadzienna.postep::%player%}
+			wait 2 tick
+			send "&6&lMisje dzienne &8» &7Postęp: &a%{misjadzienna.postep::%player%}%&8/&2150" to player
+		
